@@ -1,0 +1,17 @@
+{
+  "name": "UPTET Offline Quiz",
+  "short_name": "UPTET Quiz",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#f3f7ff",
+  "theme_color": "#1d4ed8",
+  "description": "Offline-first UPTET quiz practice app.",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
