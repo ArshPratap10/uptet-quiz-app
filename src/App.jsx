@@ -38,19 +38,38 @@ export default function App() {
   const [appLang, setAppLang] = useState('hi'); // Default language is Hindi per user request
   const t = (en, hi) => appLang === 'hi' ? hi : en;
   
-  const goToView = (nextView) => {
-    setViewHistory(prev => [...prev, currentView]);
-    setCurrentView(nextView);
+  const goToView = (nextView, reset = false) => {
+    if (nextView !== currentView) {
+      if (reset) {
+        setViewHistory([]);
+      } else {
+        setViewHistory(prev => [...prev, currentView]);
+      }
+      setCurrentView(nextView);
+    }
   };
 
   const goBackView = () => {
-    setViewHistory(prev => {
-      if (prev.length === 0) return prev;
-      const next = prev[prev.length - 1];
-      goToView(next);
-      return prev.slice(0, -1);
-    });
+    if (viewHistory.length === 0) {
+      setCurrentView('dashboard');
+      return;
+    }
+    
+    const prev = [...viewHistory];
+    const targetView = prev.pop();
+    
+    setViewHistory(prev);
+    setCurrentView(targetView);
   };
+
+  const PageBackButton = ({ onClick, label }) => (
+    <button 
+      className="page-back-btn" 
+      onClick={onClick || goBackView}
+    >
+      ← {label || t("Back", "वापस")}
+    </button>
+  );
   
   const [isSelectingChapters, setIsSelectingChapters] = useState(false);
   const [selectedMultiChapters, setSelectedMultiChapters] = useState(new Set());
@@ -436,7 +455,7 @@ export default function App() {
       </div>
       
       <div className="sidebar-section">
-        <div className={`sidebar-item ${currentView === 'dashboard' || currentView === 'history' ? 'active' : ''}`} onClick={() => goToView('dashboard')}>
+        <div className={`sidebar-item ${currentView === 'dashboard' || currentView === 'history' ? 'active' : ''}`} onClick={() => goToView('dashboard', true)}>
           <LayoutDashboard size={20} /> {t("Dashboard", "डैशबोर्ड")}
         </div>
       </div>
@@ -451,6 +470,16 @@ export default function App() {
         </div>
         <div className={`sidebar-item ${currentView === 'syllabus' ? 'active' : ''}`} onClick={() => goToView('syllabus')}>
           <GraduationCap size={20} /> {t("Syllabus", "पाठ्यक्रम")}
+        </div>
+      </div>
+
+      <div className="sidebar-section">
+        <div className="sidebar-section-title">{t("Tests", "परीक्षण")}</div>
+        <div className="sidebar-item" onClick={() => goToView('pyq')}>
+          <History size={20} /> {t("PYQ Tests", "PYQ टेस्ट")}
+        </div>
+        <div className="sidebar-item" onClick={() => goToView('subjects')}>
+          <Target size={20} /> {t("Practice Test", "प्रैक्टिस टेस्ट")}
         </div>
       </div>
 
@@ -499,11 +528,6 @@ export default function App() {
           <div className="header-logo-text" style={{ fontWeight: 700, fontSize: '1.25rem' }}>ExamGOAL</div>
         </div>
         <div className="header-actions">
-          {viewHistory.length > 0 && (
-            <button className="btn-outline header-btn" onClick={goBackView}>
-              ← Back
-            </button>
-          )}
           <button 
              className="btn-outline header-btn" 
              style={{ backgroundColor: 'var(--card-bg)', color: 'var(--primary)' }}
@@ -535,7 +559,7 @@ export default function App() {
           <button className="btn-outline header-btn">{t("PYQ Tests", "PYQ टेस्ट")}</button>
           <button className="btn-outline header-btn">{t("Practice Test", "प्रैक्टिस टेस्ट")}</button>
           <Bell size={20} color="white" style={{ cursor: 'pointer', marginLeft: '1rem' }} />
-          <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <div className="profile-pill" style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <User size={20} color="white" />
           </div>
         </div>
@@ -651,9 +675,7 @@ export default function App() {
 
   const renderSubjects = () => (
     <div className="content-area">
-      <button className="btn-outline" style={{ marginBottom: '1rem' }} onClick={goBackView}>
-        ← {t("Back", "वापस")}
-      </button>
+      <PageBackButton />
       <h1 className="section-title">{t("Chapter Wise Practice", "अध्याय वार अभ्यास")}</h1>
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
         {t("Choose a subject, then select a chapter to continue practice with saved progress.", "एक विषय चुनें, फिर अध्याय चुनकर सेव प्रगति के साथ अभ्यास जारी रखें।")}
@@ -723,9 +745,7 @@ export default function App() {
 
     return (
       <div className="content-area">
-        <button className="btn-outline" style={{ marginBottom: '1.5rem' }} onClick={() => goToView('subjects')}>
-           ← {t("Back to Workbooks", "वर्कबुक्स पर वापस जाएँ")}
-        </button>
+        <PageBackButton label={t("Back to Workbooks", "वर्कबुक्स पर वापस जाएँ")} />
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
            <h1 className="section-title" style={{ margin: 0 }}>{selectedSubject} {t("Modules", "मॉड्यूल")}</h1>
@@ -850,9 +870,7 @@ export default function App() {
     const years = [...new Set(questionsData.map(q => q.year))].sort().reverse();
     return (
       <div className="content-area">
-        <button className="btn-outline" style={{ marginBottom: "1.5rem" }} onClick={goBackView}>
-          ← {t("Back", "वापस")}
-        </button>
+        <PageBackButton />
         <h1 className="section-title">{t("Exam Simulator", "परीक्षा सिम्युलेटर")}</h1>
         <p style={{ color: "var(--text-muted)", marginBottom: "2rem" }}>{t("Run a proper test strictly evaluated at the end.", "एक पूरा परीक्षण चलाएं जो अंत में सख्ती से मूल्यांकित हो।")}</p>
         
@@ -1052,7 +1070,10 @@ export default function App() {
 
     return (
       <div className="content-area">
-        <button onClick={() => goToView('dashboard')} className="btn-outline" style={{ marginBottom: '1.5rem' }}>← Back to Dashboard</button>
+        <PageBackButton 
+           onClick={() => goToView('dashboard', true)} 
+           label={t("Back to Dashboard", "डैशबोर्ड पर वापस जाएँ")} 
+        />
         
         {/* SCORECARD UI */}
         <div className="performance-card">
@@ -1345,9 +1366,7 @@ export default function App() {
 
     return (
       <div className="content-area">
-        <button className="btn-outline" style={{ marginBottom: "1.5rem" }} onClick={goBackView}>
-          ← {t("Back", "वापस")}
-        </button>
+        <PageBackButton />
         <h1 className="section-title">{t("UPTET Master Syllabus", "UPTET मास्टर पाठ्यक्रम")}</h1>
         <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
           {t("The complete detailed syllabus for Paper 2 targeting proper preparation.", "उचित तैयारी के लिए पेपर 2 का पूरा विस्तृत पाठ्यक्रम।")}

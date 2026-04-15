@@ -128,10 +128,9 @@ h1, h2, h3, .sidebar-header, .section-title {
   position: relative;
 }
 
-/* ==================== HAMBURGER TOGGLE BUTTON ==================== */
 /* ==================== NAVBAR INTEGRATED TOGGLE ==================== */
 .sidebar-toggle {
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.15);
@@ -142,6 +141,29 @@ h1, h2, h3, .sidebar-header, .section-title {
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  margin-right: 0.5rem;
+}
+
+/* Page Back Button styling */
+.page-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1.25rem !important;
+  border-radius: 10px !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  background-color: var(--primary-light) !important;
+  color: var(--primary) !important;
+  border: 1px solid var(--primary) !important;
+  transition: all 0.3s ease !important;
+}
+
+.page-back-btn:hover {
+  background-color: var(--primary) !important;
+  color: white !important;
+  transform: translateX(-4px);
 }
 
 .sidebar-toggle:hover {
@@ -711,11 +733,12 @@ h1, h2, h3, .sidebar-header, .section-title {
   }
 
   .sidebar-toggle {
-    display: flex;
+    display: flex !important;
   }
 
-  .header-logo-text {
-    display: none;
+  /* Hide Logo on Mobile/Tablet */
+  .header-logo-text, .header-icon {
+    display: none !important;
   }
 
   .top-header {
@@ -725,6 +748,17 @@ h1, h2, h3, .sidebar-header, .section-title {
 
   .header-actions {
     gap: 0.5rem;
+  }
+
+  /* Hide extra buttons in header for mobile - they will be in sidebar */
+  .header-actions .btn-outline {
+    display: none !important;
+  }
+  
+  /* Keep only necessary toggles in header */
+  .header-actions .dark-mode-toggle,
+  .header-actions .profile-pill {
+    display: flex !important;
   }
 
   /* Hide secondary header buttons on small mobile to stay clean */
