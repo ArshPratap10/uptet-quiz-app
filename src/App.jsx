@@ -482,9 +482,21 @@ export default function App() {
 
     return (
       <div className="top-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-           <BookOpen size={24} />
-           <div style={{ fontWeight: 700, fontSize: '1.25rem' }}>ExamGOAL</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(prev => !prev)}
+            aria-label="toggle-sidebar"
+            style={{ marginRight: '0.5rem' }}
+          >
+            <div className="hamburger">
+              <span />
+              <span />
+              <span />
+            </div>
+          </button>
+          <BookOpen size={24} className="header-icon" />
+          <div className="header-logo-text" style={{ fontWeight: 700, fontSize: '1.25rem' }}>ExamGOAL</div>
         </div>
         <div className="header-actions">
           {viewHistory.length > 0 && (
@@ -877,11 +889,23 @@ export default function App() {
       <div className="quiz-container">
         <div className="quiz-main">
           <div className="quiz-header">
-            <span style={{ fontWeight: 600 }}>{selectedChapter}</span>
-            <button className="btn-outline" style={{ padding: "0.25rem 0.75rem", fontSize: "0.8rem" }} onClick={goBackView}>{t("Exit", "बाहर निकलें")}</button>
-            <span style={{ padding: '0.25rem 0.75rem', backgroundColor: 'var(--bg-main)', borderRadius: 999 }}>
-              Question {currentQuestionIndex + 1} of {quizQuestions.length}
-            </span>
+            <div style={{ flex: 1, minWidth: '150px' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>{t("Submodule", "उप-मॉड्यूल")}</div>
+              <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--primary)' }}>{selectedChapter}</div>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <span style={{ padding: '0.4rem 0.8rem', backgroundColor: 'var(--bg-main)', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600, border: '1px solid var(--border)' }}>
+                {t("Question", "प्रश्न")} {currentQuestionIndex + 1} / {quizQuestions.length}
+              </span>
+              <button 
+                className="btn-outline" 
+                style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", fontWeight: 600, borderColor: 'var(--error)', color: 'var(--error)' }} 
+                onClick={goBackView}
+              >
+                ✕ {t("Exit", "बाहर निकलें")}
+              </button>
+            </div>
           </div>
 
           <div className="question-text">
@@ -1359,19 +1383,6 @@ export default function App() {
     <div className={`layout-container${sidebarOpen ? ' sidebar-open' : ''}`}>
       {/* Backdrop – tap outside to close sidebar */}
       <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
-
-      {/* Animated Hamburger Toggle */}
-      <button
-        className="sidebar-toggle"
-        onClick={() => setSidebarOpen(prev => !prev)}
-        aria-label="toggle-sidebar"
-      >
-        <div className="hamburger">
-          <span />
-          <span />
-          <span />
-        </div>
-      </button>
 
       <Sidebar />
       <div className="main-content">
