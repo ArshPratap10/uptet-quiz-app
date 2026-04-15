@@ -58,26 +58,42 @@
 [data-theme="dark"] .option-btn {
   background-color: #2d3748;
   border-color: #4a5568;
+  color: var(--text-main);
 }
 
 [data-theme="dark"] .option-btn.selected {
   background-color: #3730a3;
   border-color: #818cf8;
+  color: white;
 }
 
 [data-theme="dark"] .option-btn.correct {
-  background-color: #065f46;
+  background-color: #064e3b;
   border-color: #34d399;
+  color: white;
 }
 
 [data-theme="dark"] .option-btn.incorrect {
   background-color: #7f1d1d;
   border-color: #f87171;
+  color: white;
 }
 
 [data-theme="dark"] .option-btn:hover {
   background-color: #374151;
   border-color: #818cf8;
+  color: white;
+}
+
+[data-theme="dark"] .quiz-controls button {
+  background-color: #111827;
+  color: var(--text-main);
+  border-color: #374151;
+}
+
+[data-theme="dark"] .quiz-controls button:not(:disabled):hover {
+  background-color: #1f2937;
+  color: white;
 }
 
 body {
@@ -130,7 +146,7 @@ h1, h2, h3, .sidebar-header, .section-title {
 
 /* ==================== NAVBAR INTEGRATED TOGGLE ==================== */
 .sidebar-toggle {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.15);
@@ -407,6 +423,7 @@ h1, h2, h3, .sidebar-header, .section-title {
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s;
+  color: var(--text-main);
 }
 
 .btn-outline:hover {
@@ -605,6 +622,7 @@ h1, h2, h3, .sidebar-header, .section-title {
 
 .quiz-controls button:not(:disabled):hover {
   background-color: var(--bg-main);
+  color: var(--primary);
 }
 
 /* Performance Card */

@@ -15,7 +15,9 @@ import {
   Scale,
   Users,
   TrendingUp,
-  Menu
+  Menu,
+  Clock,
+  Timer
 } from 'lucide-react';
 import questionsData from './data/questions.json';
 import './App.css';
@@ -37,6 +39,32 @@ export default function App() {
   
   const [appLang, setAppLang] = useState('hi'); // Default language is Hindi per user request
   const t = (en, hi) => appLang === 'hi' ? hi : en;
+
+  // New Timer State
+  const [timer, setTimer] = useState(0);
+
+  useEffect(() => {
+    let interval = null;
+    if (currentView === 'quiz') {
+      interval = setInterval(() => {
+        setTimer(prev => prev + 1);
+      }, 1000);
+    } else if (currentView !== 'quiz') {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [currentView]);
+
+  const formatTime = (seconds) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hrs > 0) {
+      return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
   
   const goToView = (nextView, reset = false) => {
     if (nextView !== currentView) {
@@ -134,6 +162,7 @@ export default function App() {
        setCurrentQuestionIndex(existing.lastIndex || 0);
        setSelectedChapter(chapter);
        setQuizMode('practice');
+       setTimer(0);
        goToView('quiz');
     } else {
        // Create fresh session array
@@ -384,7 +413,8 @@ export default function App() {
       total: quizQuestions.length,
       snapshotQuestions: quizQuestions,      // Saves the exact test
       snapshotUserAnswers: userAnswers,      // Saves what they picked
-      snapshotCheckedAnswers: evaluated      // Saves the evaluation
+      snapshotCheckedAnswers: evaluated,     // Saves the evaluation
+      timeTaken: timer                       // Save the real time taken
     };
     
     setTestHistory(prev => {
@@ -656,7 +686,7 @@ export default function App() {
                     </div>
                     <div className="pill" style={{ backgroundColor: '#ffedd5' }}> {/* Orange */}
                        <span style={{ color: '#ea580c', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>● TIME</span>
-                       <span style={{ color: '#ea580c', fontSize: '1.1rem' }}>25:00</span>
+                       <span style={{ color: '#ea580c', fontSize: '1.1rem' }}>{formatTime(h.timeTaken || 0)}</span>
                     </div>
                  </div>
 
@@ -913,6 +943,9 @@ export default function App() {
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <div className="timer-display">
+                <Clock size={16} /> {formatTime(timer)}
+              </div>
               <span style={{ padding: '0.4rem 0.8rem', backgroundColor: 'var(--bg-main)', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600, border: '1px solid var(--border)' }}>
                 {t("Question", "प्रश्न")} {currentQuestionIndex + 1} / {quizQuestions.length}
               </span>
@@ -935,7 +968,7 @@ export default function App() {
               let btnClass = "option-btn";
               if (userAnswers[currentQ.id] === i) btnClass += " selected";
               
-              if ((quizMode === 'practice' || quizMode === 'revision') && validation) {
+              if (quizMode !== 'test' && validation) {
                  if (i === validation.correctIndex) btnClass += " correct";
                  else if (userAnswers[currentQ.id] === i && !validation.isCorrect) btnClass += " incorrect";
               }
@@ -945,7 +978,7 @@ export default function App() {
                   key={i} 
                   className={btnClass}
                   onClick={() => handleOptionSelect(currentQ.id, i)}
-                  disabled={(quizMode === 'practice' || quizMode === 'revision') && !!validation}
+                  disabled={!!validation}
                 >
                   <div style={{ width: 24, height: 24, borderRadius: '50%', border: '1px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '1rem', flexShrink: 0 }}>
                     {String.fromCharCode(65 + i)}
@@ -972,30 +1005,24 @@ export default function App() {
                   onClick={() => navigateQuestion(-1)}
                 >{t("Previous", "पिछला")}</button>
 
-               {(quizMode === 'practice' || quizMode === 'revision') && !validation ? (
+               {quizMode !== 'test' && !validation ? (
                   <button onClick={checkCurrentAnswer} disabled={!isAnswered}>{t("Check Answer", "उत्तर जांचें")}</button>
-               ) : (quizMode === 'practice' || quizMode === 'revision') && validation ? (
+               ) : (
                   <button 
                     onClick={() => {
                       if (currentQuestionIndex < quizQuestions.length - 1) {
                         navigateQuestion(1);
                       } else {
-                        goToView('subjects'); 
+                        if (quizMode === 'test') {
+                          submitFullTest();
+                        } else {
+                          goToView('subjects'); 
+                        }
                       }
                     }}
                   >
-                    {currentQuestionIndex < quizQuestions.length - 1 ? t('Next Question', 'अगला प्रश्न') : t('Finish Practice', 'अभ्यास समाप्त')}
+                    {currentQuestionIndex < quizQuestions.length - 1 ? t('Next Question', 'अगला प्रश्न') : (quizMode === 'test' ? t('Submit Test', 'टेस्ट जमा करें') : t('Finish Practice', 'अभ्यास समाप्त'))}
                   </button>
-               ) : null}
-
-               {quizMode === 'test' && (
-                 <>
-                   {currentQuestionIndex < quizQuestions.length - 1 ? (
-                      <button onClick={() => navigateQuestion(1)}>{t("Next", "अगला")}</button>
-                   ) : (
-                      <button style={{ backgroundColor: 'var(--success)' }} onClick={submitFullTest}>{t("Submit Test", "टेस्ट जमा करें")}</button>
-                   )}
-                 </>
                )}
             </div>
           </div>
@@ -1010,7 +1037,7 @@ export default function App() {
              {quizQuestions.map((q, i) => {
                let cellClass = "grid-cell";
                if (i === currentQuestionIndex) cellClass += " active";
-               else if ((quizMode === 'practice' || quizMode === 'revision') && checkedAnswers[q.id]) {
+               else if (quizMode !== 'test' && checkedAnswers[q.id]) {
                  cellClass += checkedAnswers[q.id].isCorrect ? " correct-mark" : " wrong-mark";
                } else if (userAnswers[q.id] !== undefined) {
                  cellClass += " answered";
@@ -1123,9 +1150,9 @@ export default function App() {
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
            <div className="metrics-box">
               <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                 <span style={{ color: 'var(--primary)' }}>●</span> Time
+                 <span style={{ color: 'var(--primary)' }}>●</span> {t("Time Taken", "लिया गया समय")}
               </div>
-              <div style={{ color: 'var(--primary)', fontWeight: 700, fontSize: '1.1rem' }}>25:00</div>
+              <div style={{ color: 'var(--primary)', fontWeight: 700, fontSize: '1.1rem' }}>{formatTime(timer)}</div>
            </div>
            <div className="metrics-box">
               <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
